@@ -16,21 +16,21 @@
             background-color: #f9f9f9;
             color: #333;
         }
-        
+
         header {
             text-align: center;
             padding: 20px;
             background-color: #4caf50;
             color: white;
         }
-        
+
         main {
             display: flex;
             flex-wrap: wrap;
             justify-content: space-around;
             padding: 20px;
         }
-        
+
         section {
             background-color: white;
             border-radius: 10px;
@@ -39,13 +39,13 @@
             padding: 20px;
             width: calc(33% - 40px);
         }
-        
+
         #status {
             display: flex;
             justify-content: space-around;
             margin-top: 10px;
         }
-        
+
         .order {
             display: flex;
             justify-content: space-between;
@@ -56,16 +56,16 @@
             border-radius: 5px;
         }
 
-        #ingredients-list {
+        #ingredients-list, #warehouse-items, #recipes-list {
             display: flex;
             flex-direction: column;
         }
-        
-        .ingredient {
+
+        .ingredient, .warehouse-item, .recipe {
             padding: 10px;
             border-bottom: 1px solid #ddd;
         }
-        
+
         footer {
             text-align: center;
             padding: 20px;
@@ -91,16 +91,19 @@
         <section id="kitchen">
             <h2>Кухня</h2>
             <div id="ingredients-list">
+                <h3>Ингредиенты</h3>
                 <!-- Ингредиенты будут здесь -->
             </div>
-        </section>
-        <section id="warehouse">
-            <h2>Склад</h2>
-            <!-- Список ингредиентов будет здесь -->
+            <div id="warehouse-items">
+                <h3>Склад</h3>
+                <!-- Список ингредиентов будет здесь -->
+            </div>
         </section>
         <section id="recipes">
             <h2>Рецепты</h2>
-            <!-- Рецепты будут здесь -->
+            <div id="recipes-list">
+                <!-- Рецепты будут здесь -->
+            </div>
         </section>
         <section id="research">
             <h2>Исследования</h2>
@@ -138,6 +141,8 @@
 
         const ordersContainer = document.getElementById('orders');
         const ingredientsList = document.getElementById('ingredients-list');
+        const warehouseItems = document.getElementById('warehouse-items');
+        const recipesList = document.getElementById('recipes-list');
 
         function generateRandomOrder() {
             const clients = ['Маша', 'Дима', 'Антон'];
@@ -180,6 +185,30 @@
                     ingredientElement.classList.add('ingredient');
                     ingredientElement.innerText = `${ingredient}: ${ingredients[ingredient]}`;
                     ingredientsList.appendChild(ingredientElement);
+                }
+            }
+        }
+
+        function updateWarehouseItemsList() {
+            warehouseItems.innerHTML = '';
+            for (let item in warehouse) {
+                if (warehouse.hasOwnProperty(item)) {
+                    const itemElement = document.createElement('div');
+                    itemElement.classList.add('warehouse-item');
+                    itemElement.innerText = `${item}: ${warehouse[item]}`;
+                    warehouseItems.appendChild(itemElement);
+                }
+            }
+        }
+
+        function updateRecipesList() {
+            recipesList.innerHTML = '';
+            for (let recipe in recipes) {
+                if (recipes.hasOwnProperty(recipe)) {
+                    const recipeElement = document.createElement('div');
+                    recipeElement.classList.add('recipe');
+                    recipeElement.innerText = `${recipe}`;
+                    recipesList.appendChild(recipeElement);
                 }
             }
         }
@@ -265,6 +294,28 @@
             'Мокка': ['Кофейные зёрна', 'Молоко', 'Шоколад'],
         };
 
+        const warehouse = {
+            'Кофейные зёрна': 10,
+            'Молоко': 10,
+            'Ванильный сироп': 5,
+            'Шоколад': 3,
+            'Лайм': 2,
+            'Лёд': 8,
+            'Выпечка': 4,
+            'Клубника': 6,
+            'Матча': 7,
+            'Карамель': 9,
+            'Кокосовое молоко': 5,
+        };
+
+        const recipes = {
+            'Эспрессо': 100,
+            'Латте': 200,
+            'Ванильный латте': 300,
+            'Айс-латте': 400,
+            'Мокка': 500,
+        };
+
         function updateStatus() {
             document.getElementById('money').innerText = money + ' ₽';
             document.getElementById('reputation').innerText = reputation;
@@ -288,6 +339,8 @@
                 research = 0;
                 updateStatus();
                 updateIngredients(ingredients, {});
+                updateWarehouseItemsList();
+                updateRecipesList();
                 alert('Прогресс сброшен!');
             }
         }
@@ -298,10 +351,14 @@
             updateOrdersList();
             setupOrderListeners();
             updateIngredientsList();
+            updateWarehouseItemsList();
+            updateRecipesList();
         }, 3000);
 
         updateStatus();
         updateIngredientsList();
+        updateWarehouseItemsList();
+        updateRecipesList();
     </script>
 </body>
 </html>
