@@ -1,0 +1,33 @@
+let money = localStorage.getItem('money') || 0;
+let reputation = localStorage.getItem('reputation') || 0;
+let research = localStorage.getItem('research') || 0;
+let maxReputation = 100;
+let maxResearch = 500;
+
+function updateStatus() {
+    document.getElementById('money').innerText = money + ' ₽';
+    document.getElementById('reputation').innerText = reputation;
+    document.getElementById('maxReputation').innerText = maxReputation;
+    document.getElementById('research').innerText = research;
+    document.getElementById('maxResearch').innerText = maxResearch;
+}
+
+function saveGame() {
+    localStorage.setItem('money', money);
+    localStorage.setItem('reputation', reputation);
+    localStorage.setItem('research', research);
+    alert('Игра сохранена!');
+}
+
+function resetGame() {
+    if (confirm('Вы уверены, что хотите сбросить прогресс?')) {
+        localStorage.clear();
+        money = 0;
+        reputation = 0;
+        research = 0;
+        updateStatus();
+        alert('Прогресс сброшен!');
+    }
+}
+
+updateStatus();
