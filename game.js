@@ -6,6 +6,8 @@ let maxResearch = 500;
 
 const ordersContainer = document.getElementById('orders');
 const ingredientsList = document.getElementById('ingredients-list');
+const warehouseItems = document.getElementById('warehouse-items');
+const recipesList = document.getElementById('recipes-list');
 
 function generateRandomOrder() {
     const clients = ['Маша', 'Дима', 'Антон'];
@@ -48,6 +50,30 @@ function updateIngredientsList() {
             ingredientElement.classList.add('ingredient');
             ingredientElement.innerText = `${ingredient}: ${ingredients[ingredient]}`;
             ingredientsList.appendChild(ingredientElement);
+        }
+    }
+}
+
+function updateWarehouseItemsList() {
+    warehouseItems.innerHTML = '';
+    for (let item in warehouse) {
+        if (warehouse.hasOwnProperty(item)) {
+            const itemElement = document.createElement('div');
+            itemElement.classList.add('warehouse-item');
+            itemElement.innerText = `${item}: ${warehouse[item]}`;
+            warehouseItems.appendChild(itemElement);
+        }
+    }
+}
+
+function updateRecipesList() {
+    recipesList.innerHTML = '';
+    for (let recipe in recipes) {
+        if (recipes.hasOwnProperty(recipe)) {
+            const recipeElement = document.createElement('div');
+            recipeElement.classList.add('recipe');
+            recipeElement.innerText = `${recipe}`;
+            recipesList.appendChild(recipeElement);
         }
     }
 }
@@ -133,6 +159,28 @@ const drinkIngredients = {
     'Мокка': ['Кофейные зёрна', 'Молоко', 'Шоколад'],
 };
 
+const warehouse = {
+    'Кофейные зёрна': 10,
+    'Молоко': 10,
+    'Ванильный сироп': 5,
+    'Шоколад': 3,
+    'Лайм': 2,
+    'Лёд': 8,
+    'Выпечка': 4,
+    'Клубника': 6,
+    'Матча': 7,
+    'Карамель': 9,
+    'Кокосовое молоко': 5,
+};
+
+const recipes = {
+    'Эспрессо': 100,
+    'Латте': 200,
+    'Ванильный латте': 300,
+    'Айс-латте': 400,
+    'Мокка': 500,
+};
+
 function updateStatus() {
     document.getElementById('money').innerText = money + ' ₽';
     document.getElementById('reputation').innerText = reputation;
@@ -156,6 +204,8 @@ function resetGame() {
         research = 0;
         updateStatus();
         updateIngredients(ingredients, {});
+        updateWarehouseItemsList();
+        updateRecipesList();
         alert('Прогресс сброшен!');
     }
 }
@@ -166,7 +216,11 @@ setInterval(() => {
     updateOrdersList();
     setupOrderListeners();
     updateIngredientsList();
+    updateWarehouseItemsList();
+    updateRecipesList();
 }, 3000);
 
 updateStatus();
 updateIngredientsList();
+updateWarehouseItemsList();
+updateRecipesList();
