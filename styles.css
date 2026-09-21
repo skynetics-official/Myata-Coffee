@@ -49,12 +49,12 @@ section {
     border-radius: 5px;
 }
 
-#ingredients-list {
+#ingredients-list, #warehouse-items, #recipes-list {
     display: flex;
     flex-direction: column;
 }
 
-.ingredient {
+.ingredient, .warehouse-item, .recipe {
     padding: 10px;
     border-bottom: 1px solid #ddd;
 }
