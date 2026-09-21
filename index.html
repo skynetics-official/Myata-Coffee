@@ -1,33 +1,307 @@
-let money = localStorage.getItem('money') || 0;
-let reputation = localStorage.getItem('reputation') || 0;
-let research = localStorage.getItem('research') || 0;
-let maxReputation = 100;
-let maxResearch = 500;
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MYATA COFFEE</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            color: #333;
+        }
+        
+        header {
+            text-align: center;
+            padding: 20px;
+            background-color: #4caf50;
+            color: white;
+        }
+        
+        main {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+            padding: 20px;
+        }
+        
+        section {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            margin: 20px;
+            padding: 20px;
+            width: calc(33% - 40px);
+        }
+        
+        #status {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 10px;
+        }
+        
+        .order {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
 
-function updateStatus() {
-    document.getElementById('money').innerText = money + ' ₽';
-    document.getElementById('reputation').innerText = reputation;
-    document.getElementById('maxReputation').innerText = maxReputation;
-    document.getElementById('research').innerText = research;
-    document.getElementById('maxResearch').innerText = maxResearch;
-}
+        #ingredients-list {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .ingredient {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>MYATA COFFEE</h1>
+        <p>Менеджер кофейни</p>
+        <div id="status">
+            <span>Деньги: <span id="money">0 ₽</span></span>
+            <span>Репутация: <span id="reputation">0</span>/<span id="maxReputation">100</span></span>
+            <span>Исследования: <span id="research">0</span>/<span id="maxResearch">500</span></span>
+        </div>
+    </header>
 
-function saveGame() {
-    localStorage.setItem('money', money);
-    localStorage.setItem('reputation', reputation);
-    localStorage.setItem('research', research);
-    alert('Игра сохранена!');
-}
+    <main>
+        <section id="orders">
+            <h2>Заказы</h2>
+            <!-- Заказы будут добавлены тут -->
+        </section>
+        <section id="kitchen">
+            <h2>Кухня</h2>
+            <div id="ingredients-list">
+                <!-- Ингредиенты будут здесь -->
+            </div>
+        </section>
+        <section id="warehouse">
+            <h2>Склад</h2>
+            <!-- Список ингредиентов будет здесь -->
+        </section>
+        <section id="recipes">
+            <h2>Рецепты</h2>
+            <!-- Рецепты будут здесь -->
+        </section>
+        <section id="research">
+            <h2>Исследования</h2>
+            <!-- Награды и исследования будут здесь -->
+        </section>
+        <section id="staff">
+            <h2>Персонал</h2>
+            <!-- Сотрудники будут здесь -->
+        </section>
+        <section id="shop">
+            <h2>Магазин</h2>
+            <!-- Ингредиенты и улучшения будут здесь -->
+        </section>
+        <section id="upgrades">
+            <h2>Улучшения</h2>
+            <!-- Улучшения для кухни и персонала будут здесь -->
+        </section>
+        <section id="achievements">
+            <h2>Достижения</h2>
+            <!-- Достижения будут здесь -->
+        </section>
+    </main>
 
-function resetGame() {
-    if (confirm('Вы уверены, что хотите сбросить прогресс?')) {
-        localStorage.clear();
-        money = 0;
-        reputation = 0;
-        research = 0;
+    <footer>
+        <button onclick="saveGame()">Сохранить</button>
+        <button onclick="resetGame()">Сбросить прогресс</button>
+    </footer>
+
+    <script>
+        let money = localStorage.getItem('money') || 0;
+        let reputation = localStorage.getItem('reputation') || 0;
+        let research = localStorage.getItem('research') || 0;
+        let maxReputation = 100;
+        let maxResearch = 500;
+
+        const ordersContainer = document.getElementById('orders');
+        const ingredientsList = document.getElementById('ingredients-list');
+
+        function generateRandomOrder() {
+            const clients = ['Маша', 'Дима', 'Антон'];
+            const drinks = ['Эспрессо', 'Латте', 'Ванильный латте', 'Айс-латте', 'Мокка'];
+
+            const clientName = clients[Math.floor(Math.random() * clients.length)];
+            const drinkName = drinks[Math.floor(Math.random() * drinks.length)];
+
+            return {
+                client: clientName,
+                drink: drinkName,
+                time: Math.floor(Math.random() * 100) + 30, // Время между 30 и 130 секунд
+                reward: Math.floor(Math.random() * 500) + 100, // Награда от 100 до 600 ₽
+            };
+        }
+
+        function updateOrdersList() {
+            ordersContainer.innerHTML = '';
+            for (let i = 0; i < 3; i++) { // Отображаем 3 заказа
+                const order = generateRandomOrder();
+                const orderElement = document.createElement('div');
+                orderElement.classList.add('order');
+
+                orderElement.innerHTML = `
+                    <span>${order.client}:</span>
+                    <span>${order.drink}</span>
+                    <span>Время: ${order.time} сек.</span>
+                    <span>Награда: ${order.reward} ₽</span>
+                `;
+
+                ordersContainer.appendChild(orderElement);
+            }
+        }
+
+        function updateIngredientsList() {
+            ingredientsList.innerHTML = '';
+            for (let ingredient in ingredients) {
+                if (ingredients.hasOwnProperty(ingredient)) {
+                    const ingredientElement = document.createElement('div');
+                    ingredientElement.classList.add('ingredient');
+                    ingredientElement.innerText = `${ingredient}: ${ingredients[ingredient]}`;
+                    ingredientsList.appendChild(ingredientElement);
+                }
+            }
+        }
+
+        function checkIngredients(drink) {
+            const requiredIngredients = drinkIngredients[drink];
+            for (let ingredient of requiredIngredients) {
+                if (!ingredients[ingredient] || ingredients[ingredient] === 0) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        function updateIngredients(ingredientsToRemove, ingredientsToAdd) {
+            for (let ingredient in ingredientsToRemove) {
+                if (ingredientsToRemove.hasOwnProperty(ingredient)) {
+                    ingredients[ingredient] -= ingredientsToRemove[ingredient];
+                }
+            }
+
+            for (let ingredient in ingredientsToAdd) {
+                if (ingredientsToAdd.hasOwnProperty(ingredient)) {
+                    ingredients[ingredient] += ingredientsToAdd[ingredient];
+                }
+            }
+
+            localStorage.setItem('ingredients', JSON.stringify(ingredients));
+        }
+
+        function executeOrder(order) {
+            const { drink, reward } = order;
+            if (checkIngredients(drink)) {
+                updateIngredients(drinkIngredients[drink], {});
+                money += reward;
+                reputation += Math.floor(reward * 0.1);
+                research += Math.floor(reward * 0.2);
+                updateStatus();
+                alert(`Вы выполнили заказ! Вы получили ${reward} ₽`);
+            } else {
+                alert(`Ингредиенты для заказа ${drink} не хватает.`);
+            }
+        }
+
+        function setupOrderListeners() {
+            const orderElements = document.querySelectorAll('.order');
+            orderElements.forEach(orderElement => {
+                orderElement.addEventListener('click', () => {
+                    const orderData = orderElement.querySelector('span').innerText.split(':');
+                    const client = orderData[0].trim();
+                    const drink = orderData[1].trim();
+                    const time = parseInt(orderData[2].split(':')[1].trim());
+                    const reward = parseInt(orderData[3].split(':')[1].trim());
+
+                    if (new Date().getTime() - startOrderTime < time * 1000) {
+                        alert('Вы не успели выполнить заказ.');
+                    } else {
+                        executeOrder({ client, drink, time, reward });
+                    }
+                });
+            });
+        }
+
+        const ingredients = {
+            'Кофейные зёрна': 10,
+            'Молоко': 10,
+            'Ванильный сироп': 5,
+            'Шоколад': 3,
+            'Лайм': 2,
+            'Лёд': 8,
+            'Выпечка': 4,
+            'Клубника': 6,
+            'Матча': 7,
+            'Карамель': 9,
+            'Кокосовое молоко': 5,
+        };
+
+        const drinkIngredients = {
+            'Эспрессо': ['Кофейные зёрна'],
+            'Латте': ['Кофейные зёрна', 'Молоко'],
+            'Ванильный латте': ['Кофейные зёрна', 'Молоко', 'Ванильный сироп'],
+            'Айс-латте': ['Кофейные зёрна', 'Молоко', 'Лёд'],
+            'Мокка': ['Кофейные зёрна', 'Молоко', 'Шоколад'],
+        };
+
+        function updateStatus() {
+            document.getElementById('money').innerText = money + ' ₽';
+            document.getElementById('reputation').innerText = reputation;
+            document.getElementById('maxReputation').innerText = maxReputation;
+            document.getElementById('research').innerText = research;
+            document.getElementById('maxResearch').innerText = maxResearch;
+        }
+
+        function saveGame() {
+            localStorage.setItem('money', money);
+            localStorage.setItem('reputation', reputation);
+            localStorage.setItem('research', research);
+            alert('Игра сохранена!');
+        }
+
+        function resetGame() {
+            if (confirm('Вы уверены, что хотите сбросить прогресс?')) {
+                localStorage.clear();
+                money = 0;
+                reputation = 0;
+                research = 0;
+                updateStatus();
+                updateIngredients(ingredients, {});
+                alert('Прогресс сброшен!');
+            }
+        }
+
+        let startOrderTime = new Date().getTime();
+
+        setInterval(() => {
+            updateOrdersList();
+            setupOrderListeners();
+            updateIngredientsList();
+        }, 3000);
+
         updateStatus();
-        alert('Прогресс сброшен!');
-    }
-}
-
-updateStatus();
+        updateIngredientsList();
+    </script>
+</body>
+</html>
