@@ -1,0 +1,867 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Мята Coffee — Coffee Empire v6</title>
+<style>
+:root{
+  --ink:#20251f;--muted:#6f776d;--cream:#f7f4ed;--green:#294838;--lime:#c8e27b;
+  --line:#dfe3d8;--gold:#e7b84b;--purple:#7657a8;--ice:#7ec4cf;--hot:#d96c4c;
+  --warn:#e74c3c;--ok:#27ae60;--panel:#ffffff;--tea:#7fb069;
+  --sky-day:#e8f4f8;--sky-eve:#ffe8c8;--sky-night:#2c3e50;
+}
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;background:var(--cream);color:var(--ink);font-family:Arial,Helvetica,sans-serif;line-height:1.35;transition:background 1s}
+body.evening{background:#fff4e6}body.night{background:#2a2d33;color:#eee}body.night .panel,body.night .badge,body.night .card,body.night .staff-card,body.night .supp,body.night .ach,body.night .res,body.night .inv-cell{background:#363a42;border-color:#4a4f58;color:#eee}body.night .small,body.night .hint,body.night .desc{color:#aaa}
+.wrap{width:min(1300px,96vw);margin:auto}nav{height:74px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);gap:10px;background:rgba(247,244,237,.92);backdrop-filter:blur(6px);position:sticky;top:0;z-index:10}body.night nav{background:rgba(40,43,48,.9);border-color:#4a4f58}
+.logo{font-size:22px;font-weight:900;display:flex;align-items:center;gap:8px}.logo i{display:inline-block;width:12px;height:12px;border-radius:50%;background:var(--lime);box-shadow:0 0 0 4px #e0f0b8}
+.top{display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end}.badge{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:7px 12px;font-weight:800;white-space:nowrap;font-size:14px}
+.game{padding:24px 0 70px}.hero{text-align:center;margin-bottom:16px}.hero h1{font-size:clamp(32px,5vw,56px);letter-spacing:-2px;margin:6px 0 4px}.sub{color:var(--muted);margin:0;font-size:15px}body.night .sub{color:#aaa}
+.layout{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:18px}
+@media(max-width:960px){.layout{grid-template-columns:1fr}}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:18px;box-shadow:0 10px 30px #232e1e10;position:relative;overflow:hidden}
+
+/* Время и событие */
+.timebar{height:6px;background:#e0e0e0;border-radius:3px;margin:8px 0;overflow:hidden}.timefill{height:100%;width:0;background:linear-gradient(90deg,var(--hot),var(--gold),var(--ice));transition:width .3s}
+.time-info{display:flex;justify-content:space-between;align-items:center;font-size:13px;font-weight:800;margin-bottom:8px}
+.event-banner{text-align:center;padding:8px 12px;border-radius:12px;font-weight:900;font-size:14px;margin-bottom:12px;animation:pulse 2s infinite}
+.event-morning{background:#fff8e1;color:#8d6e63}.event-rain{background:#e3f2fd;color:#1565c0}.event-festival{background:#f3e5f5;color:#6a1b9a}.event-rush{background:#ffebee;color:#c62828}.event-supply{background:#e8f5e9;color:#2e7d32}.event-inspection{background:#fff3e0;color:#ef6c00}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.01)}}
+
+/* Ресурсы */
+.res-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(90px,1fr));gap:8px;margin-bottom:14px}
+.res{background:#fafaf7;border:1px solid var(--line);border-radius:12px;padding:8px;text-align:center;font-size:12px;font-weight:800}.res .n{font-size:16px;color:var(--green)}.res .cap{color:var(--muted);font-size:10px}
+
+/* Заказ */
+.order-stage{text-align:center;padding:10px 0}
+.order-label{font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);font-weight:800;margin-bottom:6px}
+#orderCard{max-width:420px;margin:0 auto 14px;border:2px dashed var(--line);border-radius:18px;padding:16px;background:#fafaf7;min-height:130px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;transition:.2s}
+#orderCard.active{border-style:solid;border-color:var(--green);background:#f4faf0}body.night #orderCard{background:#40454d}
+.order-items{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin:6px 0}
+.oitem{background:#fff;border:1px solid var(--line);border-radius:12px;padding:8px 12px;font-weight:800;font-size:13px;display:flex;align-items:center;gap:6px}
+.oitem .t{font-size:10px;padding:2px 6px;border-radius:8px}.oitem .t.hot{background:#fdecea;color:var(--hot)}.oitem .t.iced{background:#e6f5f7;color:var(--ice)}.oitem .t.food{background:#f0f0f0;color:#555}
+
+.big-coffee{width:170px;height:170px;border:0;border-radius:50%;background:var(--lime);display:block;margin:8px auto;font-size:72px;cursor:pointer;box-shadow:0 9px 0 #a8c65d;transition:.08s}.big-coffee:active:not(:disabled){transform:translateY(7px);box-shadow:0 3px 0 #a8c65d}.big-coffee:disabled{opacity:.45;cursor:not-allowed}.big-coffee.overheat{animation:shake .4s;filter:brightness(1.2)}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+
+.controls{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:10px}
+.toggle-btn{border:2px solid var(--line);background:#fff;border-radius:12px;padding:8px 14px;font-weight:800;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:.15s;font-size:13px}
+.toggle-btn.active.hot{border-color:var(--hot);color:var(--hot);background:#fdecea}.toggle-btn.active.iced{border-color:var(--ice);color:var(--ice);background:#e6f5f7}
+
+.stat{text-align:center;font-size:20px;font-weight:900}.small{font-size:12px;color:var(--muted)}
+.bar{height:10px;background:#edf0e8;border-radius:10px;overflow:hidden;margin:6px 0}.fill{height:100%;width:0;background:var(--green);transition:.25s}
+.stress-bar{height:8px;background:#fdecea;border-radius:4px;overflow:hidden;margin:6px 0}.stress-fill{height:100%;width:0;background:var(--hot);transition:.2s}
+.log{text-align:center;min-height:20px;color:#69805d;font-weight:800;margin-top:8px;font-size:13px}
+
+/* Вкладки */
+.tabs{display:flex;gap:5px;margin-bottom:12px;flex-wrap:wrap}.tab{flex:1;min-width:70px;padding:8px;border:1px solid var(--line);background:transparent;border-radius:10px;font-weight:800;cursor:pointer;transition:.15s;font-size:13px}.tab.active{background:var(--green);color:#fff}
+
+/* Списки */
+.item{border:1px solid var(--line);border-radius:13px;padding:11px;margin:8px 0;display:flex;justify-content:space-between;align-items:center;gap:9px}.item .meta{flex:1}.item .title{font-weight:900;font-size:14px}.item .desc{font-size:11px;color:var(--muted)}
+.btn,.buy{border:0;background:var(--green);color:#fff;border-radius:16px;padding:7px 12px;font-weight:800;cursor:pointer;transition:.15s;font-size:13px}.btn:disabled,.buy:disabled{opacity:.4;cursor:not-allowed}.btn.secondary{background:var(--gold);color:#2a2208}.btn.small{padding:5px 9px;font-size:11px}
+
+/* Рецепты */
+.recipe-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.card{border:1px solid var(--line);border-radius:14px;padding:11px;background:#fafaf7;text-align:center;position:relative}.card .emoji{font-size:32px}.card b{font-size:13px}.card .small{font-size:10px}.card .cost{color:var(--green);font-weight:900;font-size:13px}.card .ing{font-size:10px;color:var(--muted);margin-top:4px}.card .temp-row{display:flex;gap:5px;margin-top:6px}.card .temp-row button{flex:1;font-size:10px;padding:5px 2px;border-radius:8px;border:1px solid var(--line);background:#fff;cursor:pointer;font-weight:800}.card .temp-row button.active.hot{background:var(--hot);color:#fff;border-color:var(--hot)}.card .temp-row button.active.iced{background:var(--ice);color:#fff;border-color:var(--ice)}.card .cat{font-size:9px;text-transform:uppercase;letter-spacing:1px;color:#fff;background:var(--green);padding:2px 6px;border-radius:8px;position:absolute;top:8px;right:8px}.card.cat-tea .cat{background:var(--tea)}.card.cat-dessert .cat{background:var(--purple)}
+@media(max-width:560px){.recipe-grid{grid-template-columns:1fr 1fr}}
+
+/* Склад */
+.inv-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.inv-cell{background:#fafaf7;border:1px solid var(--line);border-radius:12px;padding:8px;text-align:center;font-size:11px;font-weight:800}.inv-cell .emoji{font-size:22px;display:block}.inv-cell .n{font-size:14px;color:var(--green)}.inv-cell .cap{font-size:9px;color:var(--muted)}
+@media(max-width:560px){.inv-grid{grid-template-columns:repeat(3,1fr)}}
+
+/* Персонал */
+.staff-card{border:1px solid var(--line);border-radius:13px;padding:11px;margin:8px 0;background:#fafaf7}.staff-card .head{display:flex;justify-content:space-between;align-items:center}.staff-card .emoji{font-size:26px}.staff-card .name{font-weight:900;font-size:14px}.staff-card .lvl{font-size:11px;color:var(--muted)}.staff-card .stats{font-size:11px;color:var(--muted);margin:5px 0}.staff-card .actions{display:flex;gap:6px;flex-wrap:wrap}
+
+/* Поставщики */
+.supp{border:1px solid var(--line);border-radius:13px;padding:11px;margin:8px 0;background:#fafaf7}.supp .head{display:flex;justify-content:space-between;align-items:center}.supp .name{font-weight:900}.supp .desc{font-size:11px;color:var(--muted)}.supp .rate{font-size:11px;color:var(--green);font-weight:800}
+
+/* Достижения */
+.ach{border:1px solid var(--line);border-radius:13px;padding:11px;margin:8px 0;display:flex;gap:10px;align-items:center;background:#fafaf7}.ach.done{background:#f4faf0;border-color:#c8e6c9}.ach .icon{font-size:26px}.ach .info{flex:1}.ach .title{font-weight:900;font-size:14px}.ach .desc{font-size:11px;color:var(--muted)}.ach .progress{font-size:10px;color:var(--green);font-weight:800;margin-top:3px}.ach .reward{font-size:11px;color:var(--gold);font-weight:800;white-space:nowrap}
+
+/* Анимации */
+.float{position:fixed;pointer-events:none;font-weight:900;font-size:18px;animation:floatUp 1.2s ease-out forwards;z-index:100}
+@keyframes floatUp{0%{opacity:1;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(-60px) scale(1.3)}}
+.flash{animation:flash .4s}@keyframes flash{0%,100%{filter:brightness(1)}50%{filter:brightness(1.4)}}
+
+.reset{border:1px solid #ddd;background:#fff;border-radius:10px;padding:7px 12px;cursor:pointer;font-weight:800;font-size:13px}
+</style>
+</head>
+<body>
+<nav class="wrap">
+  <div class="logo">МЯТА COFFEE<i></i></div>
+  <div class="top">
+    <div class="badge">💰 <span id="money">0</span> ₽</div>
+    <div class="badge">⭐ <span id="level">1</span></div>
+    <div class="badge">🏆 <span id="achDone">0</span>/<span id="achTotal">0</span></div>
+    <div class="badge">❤️ <span id="repName">Неизвестно</span></div>
+    <div class="badge">🔄 <span id="rebirth">0</span></div>
+  </div>
+</nav>
+
+<main class="wrap game">
+  <section class="hero">
+    <div class="eyebrow">Coffee Empire v6</div>
+    <h1>Сделай кофейню огромной</h1>
+    <p class="sub">Время суток, события, репутация, анти-кликер, звуки и анимации.</p>
+  </section>
+
+  <div class="time-info">
+    <span>🕐 <span id="timeName">Утро</span></span>
+    <span id="eventText">Спокойный день</span>
+  </div>
+  <div class="timebar"><div class="timefill" id="timeFill"></div></div>
+  <div id="eventBanner" class="event-banner" style="display:none"></div>
+
+  <div class="res-row" id="resRow"></div>
+
+  <div class="layout">
+    <section class="panel" id="leftPanel">
+      <div class="stat">☕ <span id="cups">0</span> заказов</div>
+      <div class="small" style="text-align:center">Опыт <span id="xp">0</span> / <span id="need">100</span></div>
+      <div class="bar"><div class="fill" id="xpbar"></div></div>
+
+      <div class="small" style="text-align:center">Загруженность баристы (анти-кликер)</div>
+      <div class="stress-bar"><div class="stress-fill" id="stressFill"></div></div>
+
+      <div class="order-stage">
+        <div class="order-label">Текущий заказ</div>
+        <div id="orderCard">
+          <div class="emoji">🍃</div>
+          <div class="name">Заказов пока нет</div>
+          <div class="hint">Кликай по кружке, чтобы приготовить выбранный рецепт</div>
+        </div>
+      </div>
+
+      <button class="big-coffee" id="coffeeBtn" title="Приготовить выбранный рецепт">☕</button>
+      <div class="stat">+<span id="click">0</span> ₽</div>
+      <div class="small" style="text-align:center" id="clickInfo">Эспрессо • горячий</div>
+
+      <div class="controls">
+        <button class="toggle-btn hot active" id="btnHot">🔥 Горячий</button>
+        <button class="toggle-btn iced" id="btnIced">❄️ Со льдом</button>
+      </div>
+
+      <p class="small" style="text-align:center;margin-top:8px">Авто-заказы: <span id="autoRate">0</span>/сек &nbsp;|&nbsp; Репутация: <span id="rep">0</span></p>
+      <div class="log" id="log">Добро пожаловать в Мяту!</div>
+
+      <hr style="border:0;border-top:1px solid var(--line);margin:14px 0">
+      <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+        <button class="buy" id="saveBtn">💾 Сохранить</button>
+        <button class="reset" id="resetBtn">Сбросить всё</button>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="tabs">
+        <button class="tab active" data-tab="recipes">📋 Рецепты</button>
+        <button class="tab" data-tab="storage">🥡 Склад</button>
+        <button class="tab" data-tab="staff">👨‍🍳 Персонал</button>
+        <button class="tab" data-tab="suppliers">🚚 Поставщики</button>
+        <button class="tab" data-tab="ach">🏆 Достижения</button>
+        <button class="tab" data-tab="rebirth">🔄 Ребирт</button>
+      </div>
+
+      <div id="recipes">
+        <p class="small" style="margin-top:0">Выбери рецепт и температуру. Следи за ингредиентами и временем суток.</p>
+        <div class="recipe-grid" id="recipeCards"></div>
+      </div>
+
+      <div id="storage" style="display:none">
+        <p class="small" style="margin-top:0">Покупай ингредиенты вручную или нанимай поставщиков.</p>
+        <div class="inv-grid" id="invGrid"></div>
+      </div>
+
+      <div id="staff" style="display:none">
+        <p class="small" style="margin-top:0">Персонал автоматически готовит заказы, если хватает ингредиентов.</p>
+        <div id="staffList"></div>
+      </div>
+
+      <div id="suppliers" style="display:none">
+        <p class="small" style="margin-top:0">Автозакупка ингредиентов.</p>
+        <div id="suppList"></div>
+      </div>
+
+      <div id="ach" style="display:none">
+        <p class="small" style="margin-top:0">Выполняй цели и получай постоянные бонусы к доходу.</p>
+        <div id="achList"></div>
+      </div>
+
+      <div id="rebirth" style="display:none">
+        <div style="text-align:center;padding:14px">
+          <div style="font-size:30px;color:var(--purple);font-weight:900">+<span id="bonus">0</span>% к доходу</div>
+          <div class="small">Требуется заработать всего: <b>100 000 ₽</b></div>
+          <p class="small">Ребирт сбросит прогресс, но оставит достижения и даст +25% к доходу.</p>
+          <button class="btn" id="rebirthBtn" style="margin-top:8px;padding:10px 22px;font-size:15px">🔄 Сделать ребирт</button>
+        </div>
+      </div>
+    </section>
+  </div>
+</main>
+
+<script>
+// ============================
+// ДАННЫЕ
+// ============================
+const INGREDIENTS = {
+  beans:{emoji:'🫘',name:'Зёрна',baseCost:2,cap:200}, milk:{emoji:'🥛',name:'Молоко',baseCost:3,cap:200},
+  sugar:{emoji:'🍬',name:'Сахар',baseCost:1,cap:300}, ice:{emoji:'🧊',name:'Лёд',baseCost:2,cap:300},
+  cream:{emoji:'🍦',name:'Сливки',baseCost:5,cap:150}, chocolate:{emoji:'🍫',name:'Шоколад',baseCost:8,cap:120},
+  matcha:{emoji:'🍵',name:'Матча',baseCost:12,cap:100}, tea:{emoji:'🌿',name:'Чай',baseCost:6,cap:120},
+  flour:{emoji:'🌾',name:'Мука',baseCost:4,cap:200}, butter:{emoji:'🧈',name:'Масло',baseCost:7,cap:120},
+  berries:{emoji:'🫐',name:'Ягоды',baseCost:10,cap:100}, vanilla:{emoji:'🌸',name:'Ваниль',baseCost:15,cap:80}
+};
+
+const RECIPES = {
+  espresso:{emoji:'☕',name:'Эспрессо',cat:'coffee',base:12,hot:true,iced:false,ing:{beans:2,sugar:1}},
+  americano:{emoji:'🫗',name:'Американо',cat:'coffee',base:15,hot:true,iced:true,ing:{beans:2},cost:200},
+  cap:{emoji:'🥛',name:'Капучино',cat:'coffee',base:28,hot:true,iced:false,ing:{beans:2,milk:2,sugar:1},cost:600},
+  latte:{emoji:'🍼',name:'Латте',cat:'coffee',base:35,hot:true,iced:true,ing:{beans:2,milk:3},cost:1200},
+  iceLatte:{emoji:'🧊',name:'Айс-латте',cat:'coffee',base:45,hot:false,iced:true,ing:{beans:2,milk:3,ice:2},cost:2500},
+  mocha:{emoji:'🍫',name:'Мокка',cat:'coffee',base:55,hot:true,iced:true,ing:{beans:2,milk:2,chocolate:1},cost:3500},
+  raf:{emoji:'🍨',name:'Раф',cat:'coffee',base:70,hot:true,iced:true,ing:{beans:2,cream:2,vanilla:1},cost:6000},
+  flatWhite:{emoji:'☕',name:'Флэт Уайт',cat:'coffee',base:40,hot:true,iced:false,ing:{beans:3,milk:2},cost:4500},
+  cortado:{emoji:'🥃',name:'Кортадо',cat:'coffee',base:38,hot:true,iced:false,ing:{beans:3,milk:1},cost:4200},
+  matchaLatte:{emoji:'🍵',name:'Матча-латте',cat:'tea',base:75,hot:true,iced:true,ing:{matcha:1,milk:3},cost:8000},
+  greenTea:{emoji:'🌿',name:'Зелёный чай',cat:'tea',base:30,hot:true,iced:true,ing:{tea:2,sugar:1},cost:1500},
+  berryTea:{emoji:'🫐',name:'Ягодный чай',cat:'tea',base:45,hot:true,iced:true,ing:{tea:2,berries:1,sugar:1},cost:4000},
+  croissant:{emoji:'🥐',name:'Круассан',cat:'dessert',base:220,hot:false,iced:false,ing:{flour:3,butter:2},cost:4000},
+  cake:{emoji:'🍰',name:'Торт',cat:'dessert',base:900,hot:false,iced:false,ing:{flour:4,butter:2,sugar:2,chocolate:1},cost:22000},
+  cheesecake:{emoji:'🧀',name:'Чизкейк',cat:'dessert',base:650,hot:false,iced:false,ing:{flour:2,butter:1,sugar:2,cream:2},cost:16000},
+  muffin:{emoji:'🧁',name:'Маффин',cat:'dessert',base:180,hot:false,iced:false,ing:{flour:3,sugar:1,butter:1,berries:1},cost:3500},
+  tiramisu:{emoji:'🍮',name:'Тирамису',cat:'dessert',base:520,hot:false,iced:false,ing:{flour:2,butter:1,cream:2,chocolate:1},cost:14000},
+  // Ребирт-рецепты
+  doppio:{emoji:'⚡',name:'Доппио',cat:'coffee',base:65,hot:true,iced:false,ing:{beans:4,sugar:1},rebirthReq:1},
+  lavenderRaf:{emoji:'🪻',name:'Лавандовый раф',cat:'coffee',base:120,hot:true,iced:true,ing:{beans:2,cream:3,vanilla:2},rebirthReq:2},
+  volcanoLatte:{emoji:'🌋',name:'Вулканический латте',cat:'coffee',base:280,hot:true,iced:true,ing:{beans:4,milk:3,chocolate:2},rebirthReq:7},
+  divine:{emoji:'✨',name:'Божественный кофе',cat:'coffee',base:3500,hot:true,iced:true,ing:{beans:15,cream:5,vanilla:3,chocolate:2},rebirthReq:20}
+};
+
+const STAFF_DEF = [
+  {id:'bar1',emoji:'👨‍🍳',name:'Бариста',role:'coffee',speed:0.35,tip:0.05,cost:300,count:0},
+  {id:'bar2',emoji:'👩‍🍳',name:'Шеф-бариста',role:'coffee',speed:1.2,tip:0.15,cost:2800,count:0},
+  {id:'tea1',emoji:'🍵',name:'Чайный мастер',role:'tea',speed:1.0,tip:0.10,cost:2200,count:0},
+  {id:'bak1',emoji:'🥐',name:'Пекарь',role:'dessert',speed:0.6,tip:0.08,cost:3500,count:0},
+  {id:'bak2',emoji:'👨‍🍳',name:'Шеф-пекарь',role:'dessert',speed:1.8,tip:0.14,cost:9000,count:0},
+  {id:'rob1',emoji:'🤖',name:'Робот-бариста',role:'any',speed:3.0,tip:0.06,cost:15000,count:0},
+  {id:'fab1',emoji:'🏭',name:'Фабрика кофе',role:'any',speed:12,tip:0.10,cost:80000,count:0}
+];
+
+const SUPPLIERS_DEF = [
+  {id:'sup_beans',emoji:'🫘',name:'Обжарщик зёрен',ing:'beans',rate:1.5,cost:800,count:0},
+  {id:'sup_milk',emoji:'🥛',name:'Молочная ферма',ing:'milk',rate:2.0,cost:1000,count:0},
+  {id:'sup_ice',emoji:'🧊',name:'Льдозавод',ing:'ice',rate:2.5,cost:1200,count:0},
+  {id:'sup_bake',emoji:'🌾',name:'Пекарня-поставщик',ing:'flour',rate:1.5,cost:1500,count:0},
+  {id:'sup_premium',emoji:'💎',name:'Премиум поставщик',ing:'all',rate:0.8,cost:5000,count:0}
+];
+
+const UPGRADES = [
+  {id:'u1',cost:100,type:'base',val:8},{id:'u2',cost:600,type:'base',val:25},
+  {id:'u3',cost:3500,type:'base',val:80},{id:'u4',cost:20000,type:'base',val:400},
+  {id:'u5',cost:5000,type:'cap',val:1.5},{id:'u6',cost:8000,type:'spawn',val:0.25}
+];
+
+const ACHIEVEMENTS = [
+  {id:'a1',icon:'☕',title:'Первые чашки',desc:'Продать 100 напитков',target:100,type:'cups',reward:0.05},
+  {id:'a2',icon:'💰',title:'Начинающий бизнес',desc:'Заработать 25 000 ₽',target:25000,type:'earned',reward:0.08},
+  {id:'a3',icon:'❄️',title:'Ледяной король',desc:'Продать 150 холодных напитков',target:150,type:'iced',reward:0.10},
+  {id:'a4',icon:'🔥',title:'Горячая десятка',desc:'Продать 150 горячих напитков',target:150,type:'hot',reward:0.10},
+  {id:'a5',icon:'🥐',title:'Кондитер',desc:'Продать 100 десертов',target:100,type:'dessert',reward:0.12},
+  {id:'a6',icon:'👨‍🍳',title:'Команда мечты',desc:'Нанять 15 сотрудников',target:15,type:'staff',reward:0.12},
+  {id:'a7',icon:'🚚',title:'Автоматизация',desc:'Нанять 5 поставщиков',target:5,type:'suppliers',reward:0.10},
+  {id:'a8',icon:'⭐',title:'Уровень 30',desc:'Достичь 30 уровня',target:30,type:'level',reward:0.15},
+  {id:'a9',icon:'🏆',title:'Кофейная империя',desc:'Сделать 3 ребирта',target:3,type:'rebirth',reward:0.25},
+  {id:'a10',icon:'❤️',title:'Любимая кофейня',desc:'Достичь 50 репутации',target:50,type:'rep',reward:0.10},
+  {id:'a11',icon:'🌙',title:'Ночная смена',desc:'Продать 50 заказов ночью',target:50,type:'night',reward:0.12}
+];
+
+const EVENTS = [
+  {id:'morning',name:'☕ Утренний час пик',desc:'Много заказов на кофе',class:'event-morning',effect:'spawn',val:2.5,dur:20},
+  {id:'rain',name:'🌧️ Дождь',desc:'Меньше клиентов, все хотят горячее',class:'event-rain',effect:'hot',val:1.5,dur:30},
+  {id:'festival',name:'🎉 Фестиваль кофе',desc:'Чаевые ×2',class:'event-festival',effect:'tips',val:2,dur:25},
+  {id:'rush',name:'⚡ Обеденный rush',desc:'Заказы появляются очень быстро',class:'event-rush',effect:'spawn',val:3,dur:15},
+  {id:'supply',name:'🚚 Оптовая поставка',desc:'Ингредиенты дешевле на 30%',class:'event-supply',effect:'cheap',val:0.7,dur:40},
+  {id:'inspection',name:'🔍 Проверка СЭС',desc:'Ошибки снижают репутацию в 2 раза сильнее',class:'event-inspection',effect:'strict',val:2,dur:25}
+];
+
+let S = {
+  money:0,cups:0,xp:0,level:1,earned:0,rebirth:0,rep:0,
+  baseBonus:0,spawnRate:1,capMult:1,
+  recipes:{espresso:true},inv:{},
+  staff:STAFF_DEF.map(s=>({...s})),
+  suppliers:SUPPLIERS_DEF.map(s=>({...s})),
+  achievements:ACHIEVEMENTS.map(a=>({...a})),
+  stats:{iced:0,hot:0,dessert:0,staffHired:0,suppliersHired:0,night:0}
+};
+Object.keys(INGREDIENTS).forEach(k=>S.inv[k]=0);
+
+let currentOrder = null;
+let selectedRecipe = 'espresso';
+let selectedTemp = 'hot';
+let orderTimer = 0;
+let autoSaveTimer = 0;
+let lastTick = performance.now();
+let stress = 0; // 0-100, анти-кликер
+let lastClickTime = 0;
+let dayTime = 0; // 0-1
+let currentEvent = null;
+let eventTimer = 0;
+let nextEventTime = 45 + Math.random()*45;
+let audioCtx = null;
+
+const $ = id => document.getElementById(id);
+
+// ============================
+// ЗВУКИ
+// ============================
+function initAudio(){ if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)(); }
+function playSound(type){
+  if(!audioCtx) return;
+  try{
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.connect(gain); gain.connect(audioCtx.destination);
+    const now = audioCtx.currentTime;
+    if(type==='click'){ osc.type='sine'; osc.frequency.setValueAtTime(600,now); osc.frequency.exponentialRampToValueAtTime(300,now+0.1); gain.gain.setValueAtTime(0.1,now); gain.gain.exponentialRampToValueAtTime(0.01,now+0.1); osc.start(now); osc.stop(now+0.1); }
+    else if(type==='sell'){ osc.type='triangle'; osc.frequency.setValueAtTime(800,now); osc.frequency.exponentialRampToValueAtTime(1200,now+0.15); gain.gain.setValueAtTime(0.12,now); gain.gain.exponentialRampToValueAtTime(0.01,now+0.2); osc.start(now); osc.stop(now+0.2); }
+    else if(type==='error'){ osc.type='sawtooth'; osc.frequency.setValueAtTime(200,now); osc.frequency.linearRampToValueAtTime(100,now+0.25); gain.gain.setValueAtTime(0.1,now); gain.gain.exponentialRampToValueAtTime(0.01,now+0.25); osc.start(now); osc.stop(now+0.25); }
+    else if(type==='ach'){ osc.type='sine'; osc.frequency.setValueAtTime(523,now); osc.frequency.setValueAtTime(659,now+0.1); osc.frequency.setValueAtTime(784,now+0.2); gain.gain.setValueAtTime(0.1,now); gain.gain.linearRampToValueAtTime(0,now+0.4); osc.start(now); osc.stop(now+0.4); }
+    else if(type==='event'){ osc.type='square'; osc.frequency.setValueAtTime(440,now); osc.frequency.setValueAtTime(554,now+0.1); osc.frequency.setValueAtTime(659,now+0.2); gain.gain.setValueAtTime(0.08,now); gain.gain.linearRampToValueAtTime(0,now+0.5); osc.start(now); osc.stop(now+0.5); }
+  }catch(e){}
+}
+
+// ============================
+// ВСПОМОГАТЕЛЬНЫЕ
+// ============================
+function needXp(){ return 100 + (S.level-1)*130; }
+function rebirthMult(){ return 1 + S.rebirth * 0.25; }
+function achMult(){ return 1 + S.achievements.filter(a=>a.claimed).reduce((s,a)=>s+a.reward,0); }
+function totalMult(){ return rebirthMult() * achMult(); }
+function cap(ing){ return Math.floor(INGREDIENTS[ing].cap * S.capMult); }
+function ingCost(ing){
+  let c = INGREDIENTS[ing].baseCost * (1 + S.level*0.02);
+  if(currentEvent && currentEvent.effect==='cheap') c *= currentEvent.val;
+  return Math.floor(c);
+}
+function recipePrice(id,temp){
+  const r = RECIPES[id];
+  let price = r.base + S.baseBonus;
+  if(temp==='iced' && r.iced) price += Math.floor(r.base * 0.4);
+  return Math.max(1, price);
+}
+function canCraft(id,temp){
+  const r = RECIPES[id];
+  if(temp==='iced' && !r.iced) return false;
+  if(temp==='hot' && !r.hot) return false;
+  for(const [ing,need] of Object.entries(r.ing)){ if((S.inv[ing]||0) < need) return false; }
+  if(temp==='iced' && (S.inv.ice||0) < 1) return false;
+  return true;
+}
+function consumeIngredients(id,temp){
+  const r = RECIPES[id];
+  for(const [ing,need] of Object.entries(r.ing)) S.inv[ing] -= need;
+  if(temp==='iced') S.inv.ice -= 1;
+}
+function log(t){ $('log').textContent = t; setTimeout(()=>{ if($('log').textContent===t) $('log').textContent=''; }, 2200); }
+function saveGame(){ localStorage.setItem('myataCoffeeRebirthV6', JSON.stringify(S)); }
+function loadGame(){
+  try{
+    const raw = localStorage.getItem('myataCoffeeRebirthV6');
+    if(!raw) return;
+    const loaded = JSON.parse(raw);
+    S = {...S, ...loaded};
+    if(!S.staff || S.staff.length!==STAFF_DEF.length) S.staff = STAFF_DEF.map(s=>({...s}));
+    if(!S.suppliers || S.suppliers.length!==SUPPLIERS_DEF.length) S.suppliers = SUPPLIERS_DEF.map(s=>({...s}));
+    if(!S.achievements || S.achievements.length!==ACHIEVEMENTS.length) S.achievements = ACHIEVEMENTS.map(a=>({...a}));
+    if(!S.inv){S.inv={}; Object.keys(INGREDIENTS).forEach(k=>S.inv[k]=0);}
+    Object.keys(INGREDIENTS).forEach(k=>{if(S.inv[k]==null)S.inv[k]=0});
+    if(!S.recipes) S.recipes = {espresso:true};
+    if(!S.stats) S.stats = {iced:0,hot:0,dessert:0,staffHired:0,suppliersHired:0,night:0};
+  }catch(e){ console.error(e); }
+}
+
+// ============================
+// РЕПУТАЦИЯ
+// ============================
+function repTier(){
+  if(S.rep < 10) return {name:'Неизвестно',mult:1};
+  if(S.rep < 30) return {name:'Популярно',mult:1.05};
+  if(S.rep < 60) return {name:'Любимо',mult:1.12};
+  if(S.rep < 100) return {name:'Легенда',mult:1.2};
+  return {name:'Иконка',mult:1.3};
+}
+
+// ============================
+// ВРЕМЯ СУТОК И СОБЫТИЯ
+// ============================
+function getTimeOfDay(){
+  if(dayTime < 0.25) return {name:'Утро',class:'morning'};
+  if(dayTime < 0.5) return {name:'День',class:'day'};
+  if(dayTime < 0.75) return {name:'Вечер',class:'evening'};
+  return {name:'Ночь',class:'night'};
+}
+function applyTimeEffects(){
+  const t = getTimeOfDay();
+  document.body.className = t.class;
+  $('timeName').textContent = t.name;
+  $('timeFill').style.width = (dayTime*100)+'%';
+}
+function startEvent(){
+  const pool = EVENTS.filter(e=>{
+    if(e.id==='morning') return getTimeOfDay().name==='Утро';
+    if(e.id==='rush') return getTimeOfDay().name==='День';
+    return true;
+  });
+  currentEvent = {...pool[Math.floor(Math.random()*pool.length)]};
+  eventTimer = currentEvent.dur;
+  playSound('event');
+  log('🎲 Событие: '+currentEvent.name);
+  renderEvent();
+}
+function endEvent(){
+  currentEvent = null;
+  renderEvent();
+}
+function renderEvent(){
+  const b = $('eventBanner');
+  if(!currentEvent){ b.style.display='none'; $('eventText').textContent='Спокойный день'; return; }
+  b.style.display='block'; b.className='event-banner '+currentEvent.class;
+  b.textContent = currentEvent.name + ' — ' + currentEvent.desc + ' ('+Math.ceil(eventTimer)+'с)';
+  $('eventText').textContent = currentEvent.name;
+}
+
+// ============================
+// ЗАКАЗЫ
+// ============================
+function generateOrder(){
+  const unlocked = Object.keys(RECIPES).filter(id=>S.recipes[id]);
+  const count = Math.random() < 0.35 ? 2 : 1;
+  const items = [];
+  for(let i=0;i<count;i++){
+    let pool = unlocked;
+    const timeName = getTimeOfDay().name;
+    if(timeName==='Утро') pool = unlocked.filter(id=>RECIPES[id].cat==='coffee');
+    if(timeName==='Вечер') pool = unlocked.filter(id=>RECIPES[id].cat==='dessert' || RECIPES[id].cat==='tea');
+    if(pool.length===0) pool = unlocked;
+    const id = pool[Math.floor(Math.random()*pool.length)];
+    const r = RECIPES[id];
+    let temp = 'neutral';
+    if(r.cat !== 'dessert'){
+      let icedChance = 0.30 + (S.rebirth*0.02);
+      if(currentEvent && currentEvent.effect==='hot') icedChance = 0.05;
+      if(getTimeOfDay().name==='Ночь') icedChance = 0.5;
+      temp = Math.random() < icedChance ? 'iced' : 'hot';
+    }
+    items.push({id,temp});
+  }
+  currentOrder = {items,time:25};
+  renderOrder();
+}
+function renderOrder(){
+  const card = $('orderCard');
+  if(!currentOrder){ card.className=''; card.innerHTML=`<div class="emoji">🍃</div><div class="name">Заказов пока нет</div><div class="hint">Кликай по кружке или жди клиентов</div>`; $('coffeeBtn').disabled=true; return; }
+  card.className='active';
+  let html = `<div class="order-items">`;
+  currentOrder.items.forEach(it=>{
+    const r = RECIPES[it.id];
+    const t = it.temp==='hot'?'🔥 Горячий':it.temp==='iced'?'❄️ Со льдом':'🥡 Еда';
+    html += `<div class="oitem"><span>${r.emoji}</span><span>${r.name}</span><span class="t ${it.temp}">${t}</span></div>`;
+  });
+  html += `</div><div class="hint">Осталось ${Math.ceil(currentOrder.time)}с</div>`;
+  card.innerHTML = html;
+  $('coffeeBtn').disabled = false;
+}
+
+// ============================
+// АНИМАЦИИ
+// ============================
+function floatText(text,x,y,color='#27ae60'){
+  const el = document.createElement('div'); el.className='float'; el.textContent=text; el.style.left=x+'px'; el.style.top=y+'px'; el.style.color=color;
+  document.body.appendChild(el); setTimeout(()=>el.remove(),1200);
+}
+function flashElement(el){ el.classList.add('flash'); setTimeout(()=>el.classList.remove('flash'),400); }
+
+// ============================
+// ПРИГОТОВЛЕНИЕ
+// ============================
+function fulfillOrder(manual=true,clickEvent=null){
+  if(!currentOrder) return;
+
+  // Анти-кликер: быстрые клики повышают стресс
+  if(manual){
+    const now = performance.now();
+    const delta = now - lastClickTime;
+    lastClickTime = now;
+    if(delta < 250) stress += 18; else stress = Math.max(0, stress - 8);
+    if(stress > 100) stress = 100;
+    if(stress > 80){
+      log('🔥 Бариста перегрет! Замедляйся');
+      $('coffeeBtn').classList.add('overheat');
+      setTimeout(()=>$('coffeeBtn').classList.remove('overheat'),400);
+      playSound('error');
+      S.rep = Math.max(0, S.rep - (currentEvent&&currentEvent.effect==='strict'?2:1));
+      currentOrder = null; renderOrder(); updateUI();
+      return;
+    }
+  }
+
+  const needed = {};
+  for(const it of currentOrder.items){
+    const r = RECIPES[it.id];
+    const temp = r.cat==='dessert'?'neutral':it.temp;
+    for(const [ing,n] of Object.entries(r.ing)) needed[ing]=(needed[ing]||0)+n;
+    if(temp==='iced') needed.ice=(needed.ice||0)+1;
+  }
+  for(const [ing,n] of Object.entries(needed)){ if((S.inv[ing]||0) < n){ log('🥡 Не хватает '+INGREDIENTS[ing].name); playSound('error'); return; } }
+
+  let total = 0; let perfect = true;
+  for(const it of currentOrder.items){
+    const r = RECIPES[it.id];
+    const temp = r.cat==='dessert'?'neutral':it.temp;
+    let price = recipePrice(it.id,temp);
+    if(manual){
+      if(selectedRecipe !== it.id){ price *= 0.6; perfect=false; }
+      else if(r.cat!=='dessert' && selectedTemp !== temp){ price *= 0.7; perfect=false; }
+    }
+    total += price;
+  }
+
+  for(const it of currentOrder.items){
+    consumeIngredients(it.id, it.temp==='iced'?'iced':'hot');
+    if(RECIPES[it.id].cat==='dessert') S.stats.dessert++;
+    else if(it.temp==='iced') S.stats.iced++;
+    else S.stats.hot++;
+  }
+  if(getTimeOfDay().name==='Ночь') S.stats.night++;
+
+  let tipMult = 1;
+  if(perfect && manual){ tipMult += 0.2 + (stress/500); S.rep += 1; log('✅ Идеальный заказ!'); playSound('sell'); }
+  else if(manual && !perfect){ tipMult = 0.9; log('⚠️ Заказ выполнен, но не идеально'); playSound('error'); }
+  else { log('🤖 Авто-заказ выполнен'); playSound('sell'); }
+
+  if(currentEvent && currentEvent.effect==='tips') tipMult *= currentEvent.val;
+  tipMult *= repTier().mult;
+
+  total = Math.floor(total * tipMult * totalMult());
+  S.money += total; S.earned += total; S.cups += 1; S.xp += 14;
+
+  if(clickEvent) floatText('+'+total+'₽', clickEvent.clientX, clickEvent.clientY);
+  else floatText('+'+total+'₽', window.innerWidth/2, window.innerHeight/2);
+  flashElement($('leftPanel'));
+
+  currentOrder = null;
+  checkLevelUp(); checkAchievements(); updateUI();
+}
+function checkLevelUp(){ while(S.xp >= needXp()){ S.xp -= needXp(); S.level++; log('🎉 Уровень '+S.level+'!'); playSound('ach'); } }
+
+// ============================
+// ПЕРСОНАЛ
+// ============================
+function staffSpeedFor(cat){ return S.staff.reduce((sum,s)=>{ if(s.count<1) return sum; if(s.role==='any'||s.role===cat) return sum+s.speed*s.count; return sum; },0); }
+function totalStaffSpeed(){ return staffSpeedFor('coffee')+staffSpeedFor('tea')+staffSpeedFor('dessert'); }
+function staffWork(dt){
+  let speed = totalStaffSpeed();
+  if(currentEvent && currentEvent.effect==='spawn') speed *= currentEvent.val;
+  if(speed <= 0) return;
+  orderTimer += speed * dt;
+  while(orderTimer >= 1){
+    orderTimer -= 1;
+    if(!currentOrder) generateOrder();
+    if(currentOrder){
+      const needed = {};
+      for(const it of currentOrder.items){
+        const r = RECIPES[it.id]; const temp = r.cat==='dessert'?'neutral':it.temp;
+        for(const [ing,n] of Object.entries(r.ing)) needed[ing]=(needed[ing]||0)+n;
+        if(temp==='iced') needed.ice=(needed.ice||0)+1;
+      }
+      let ok = true;
+      for(const [ing,n] of Object.entries(needed)){ if((S.inv[ing]||0)<n){ ok=false; break; } }
+      if(ok) fulfillOrder(false);
+      else { log('🥡 Персонал ждёт ингредиенты'); currentOrder.time -= 2; }
+    }
+  }
+}
+function buyStaff(idx){
+  const s = S.staff[idx]; if(S.money < s.cost){ log('💸 Не хватает денег'); return; }
+  S.money -= s.cost; s.count++; s.cost = Math.floor(s.cost*1.25); S.stats.staffHired++;
+  log('👨‍🍳 '+s.name+' нанят!'); playSound('ach'); checkAchievements(); updateUI();
+}
+function upgradeStaff(idx){
+  const s = S.staff[idx]; const c = Math.floor(s.cost*2.2);
+  if(s.count<1){ log('Сначала найми сотрудника'); return; }
+  if(S.money<c){ log('💸 Не хватает денег'); return; }
+  S.money -= c; s.speed *= 1.15; s.tip += 0.02; log('📈 '+s.name+' прокачан!'); playSound('sell'); updateUI();
+}
+
+// ============================
+// ПОСТАВЩИКИ
+// ============================
+function buySupplier(idx){
+  const s = S.suppliers[idx]; if(S.money < s.cost){ log('💸 Не хватает денег'); return; }
+  S.money -= s.cost; s.count++; s.cost = Math.floor(s.cost*1.35); S.stats.suppliersHired++;
+  log('🚚 '+s.name+' нанят!'); playSound('ach'); checkAchievements(); updateUI();
+}
+function suppliersWork(dt){
+  S.suppliers.forEach(s=>{
+    if(s.count<1) return;
+    if(s.ing==='all') Object.keys(INGREDIENTS).forEach(k=>{ S.inv[k] = Math.min(cap(k), S.inv[k] + s.rate*s.count*dt); });
+    else S.inv[s.ing] = Math.min(cap(s.ing), S.inv[s.ing] + s.rate*s.count*dt);
+  });
+}
+
+// ============================
+// УЛУЧШЕНИЯ
+// ============================
+function buyUpgrade(idx){
+  const u = UPGRADES[idx]; if(S.money < u.cost){ log('💸 Не хватает денег'); return; }
+  S.money -= u.cost;
+  if(u.type==='base') S.baseBonus += u.val;
+  if(u.type==='cap') S.capMult += u.val;
+  if(u.type==='spawn') S.spawnRate += u.val;
+  u.cost = Math.floor(u.cost*1.45);
+  log('✨ Улучшение куплено!'); playSound('sell'); updateUI();
+}
+
+// ============================
+// ДОСТИЖЕНИЯ
+// ============================
+function checkAchievements(){
+  S.achievements.forEach(a=>{
+    if(a.done) return;
+    let val = 0;
+    switch(a.type){
+      case 'cups': val=S.cups; break; case 'earned': val=S.earned; break; case 'iced': val=S.stats.iced; break;
+      case 'hot': val=S.stats.hot; break; case 'dessert': val=S.stats.dessert; break;
+      case 'staff': val=S.stats.staffHired; break; case 'suppliers': val=S.stats.suppliersHired; break;
+      case 'level': val=S.level; break; case 'rebirth': val=S.rebirth; break;
+      case 'rep': val=S.rep; break; case 'night': val=S.stats.night; break;
+    }
+    if(val >= a.target){ a.done=true; log('🏆 Достижение: '+a.title+'!'); playSound('ach'); }
+  });
+}
+function claimAchievement(idx){
+  const a = S.achievements[idx]; if(!a.done || a.claimed) return;
+  a.claimed=true; log('🎁 Бонус: +'+(a.reward*100).toFixed(0)+'% к доходу'); playSound('ach'); updateUI();
+}
+
+// ============================
+// РЕБИРТ
+// ============================
+function doRebirth(){
+  if(S.earned < 100000){ log('🔒 Нужно заработать 100 000 ₽'); return; }
+  S.rebirth++; S.money=0; S.cups=0; S.xp=0; S.level=1; S.earned=0; S.rep=0;
+  S.baseBonus=0; S.spawnRate=1; S.capMult=1;
+  S.recipes={espresso:true}; S.inv={}; Object.keys(INGREDIENTS).forEach(k=>S.inv[k]=0);
+  S.staff=STAFF_DEF.map(s=>({...s})); S.suppliers=SUPPLIERS_DEF.map(s=>({...s}));
+  S.stats={iced:0,hot:0,dessert:0,staffHired:0,suppliersHired:0,night:0};
+  currentOrder=null; orderTimer=0; stress=0;
+  log('🔄 РЕБИРТ! Бонус +'+(S.rebirth*25)+'%'); playSound('ach'); updateUI();
+}
+
+// ============================
+// ОТРИСОВКА
+// ============================
+function renderResources(){
+  const box = $('resRow'); box.innerHTML='';
+  Object.entries(INGREDIENTS).forEach(([k,v])=>{
+    const div=document.createElement('div'); div.className='res';
+    div.innerHTML=`<span style="font-size:20px">${v.emoji}</span><span class="n">${Math.floor(S.inv[k])}</span><span class="cap">${v.name}</span>`;
+    box.appendChild(div);
+  });
+}
+function renderRecipes(){
+  const box = $('recipeCards'); box.innerHTML='';
+  Object.entries(RECIPES).forEach(([id,r])=>{
+    const unlocked = !!S.recipes[id];
+    const div=document.createElement('div'); div.className='card cat-'+r.cat;
+    if(!unlocked) div.style.opacity='0.55';
+    let tempBtns='';
+    if(r.cat!=='dessert'){
+      tempBtns=`<div class="temp-row"><button class="hot ${selectedRecipe===id && selectedTemp==='hot'?'active':''}" data-id="${id}" data-t="hot">🔥</button><button class="iced ${selectedRecipe===id && selectedTemp==='iced'?'active':''}" data-id="${id}" data-t="iced">❄️</button></div>`;
+    }
+    let btnText='Готовить', disabled=false;
+    if(!unlocked){
+      if(r.rebirthReq){ btnText='🔒 Ребирт '+r.rebirthReq+'+'; disabled=S.rebirth<r.rebirthReq; }
+      else { btnText='Открыть '+r.cost+'₽'; disabled=S.money<r.cost; }
+    } else {
+      disabled = !canCraft(id, r.cat==='dessert'?'neutral':selectedTemp);
+    }
+    const catName = r.cat==='coffee'?'Кофе':r.cat==='tea'?'Чай':'Десерт';
+    const ingText = Object.entries(r.ing).map(([k,n])=>INGREDIENTS[k]?INGREDIENTS[k].name+'×'+n:'').filter(Boolean).join(', ');
+    div.innerHTML=`<span class="cat">${catName}</span><div class="emoji">${r.emoji}</div><b>${r.name}</b><div class="cost">${unlocked?recipePrice(id,'hot')+'₽ / '+recipePrice(id,'iced')+'₽':'???'}</div><div class="ing">${ingText}</div>${tempBtns}<button class="buy recipe-btn" data-id="${id}" style="margin-top:6px;width:100%" ${disabled?'disabled':''}>${btnText}</button>`;
+    box.appendChild(div);
+  });
+  document.querySelectorAll('.recipe-btn').forEach(b=>{
+    b.onclick=()=>{
+      const id=b.dataset.id; const r=RECIPES[id];
+      if(!S.recipes[id]){
+        if(r.rebirthReq && S.rebirth<r.rebirthReq){ log('🔒 Нужен ребирт '+r.rebirthReq); return; }
+        if(S.money<r.cost){ log('💸 Не хватает денег'); return; }
+        S.money-=r.cost; S.recipes[id]=true; log('✨ Рецепт "'+r.name+'" открыт!'); playSound('ach');
+      } else { selectedRecipe=id; if(r.cat==='dessert') selectedTemp='neutral'; }
+      updateUI();
+    };
+  });
+  document.querySelectorAll('.temp-row button').forEach(b=>{
+    b.onclick=(e)=>{ e.stopPropagation(); selectedRecipe=b.dataset.id; selectedTemp=b.dataset.t; updateUI(); };
+  });
+}
+function renderStorage(){
+  const box = $('invGrid'); box.innerHTML='';
+  Object.entries(INGREDIENTS).forEach(([k,v])=>{
+    const div=document.createElement('div'); div.className='inv-cell';
+    const cost=ingCost(k);
+    div.innerHTML=`<span class="emoji">${v.emoji}</span><span class="n">${Math.floor(S.inv[k])}</span><span class="cap">${v.name}</span><button class="btn small buy-ing" data-ing="${k}" style="margin-top:4px">Купить ${cost}₽</button>`;
+    box.appendChild(div);
+  });
+  document.querySelectorAll('.buy-ing').forEach(b=>{
+    b.onclick=()=>{
+      const k=b.dataset.ing; const cost=ingCost(k);
+      if(S.money<cost){ log('💸 Нет денег'); playSound('error'); return; }
+      if(S.inv[k]>=cap(k)){ log('📦 Склад полон'); return; }
+      S.money-=cost; S.inv[k]=Math.min(cap(k), S.inv[k]+10);
+      log('🥡 Куплено '+INGREDIENTS[k].name); playSound('click'); updateUI();
+    };
+  });
+}
+function renderStaff(){
+  const box = $('staffList'); box.innerHTML='';
+  S.staff.forEach((s,idx)=>{
+    const div=document.createElement('div'); div.className='staff-card';
+    const upCost=Math.floor(s.cost*2.2);
+    div.innerHTML=`<div class="head"><div style="display:flex;gap:8px;align-items:center"><span class="emoji">${s.emoji}</span><div><div class="name">${s.name}</div><div class="lvl">Нанято: ${s.count}</div></div></div><button class="btn" id="hire-${idx}">Нанять ${s.cost}₽</button></div><div class="stats">Скорость: ${s.speed.toFixed(1)} заказа/сек • Роль: ${s.role==='coffee'?'кофе':s.role==='tea'?'чай':s.role==='dessert'?'десерты':'универсал'} • Чаевые: ${(s.tip*100).toFixed(0)}%</div><div class="actions"><button class="btn secondary small" id="upg-${idx}" ${s.count<1?'disabled':''}>Обучить ${upCost}₽</button></div>`;
+    box.appendChild(div);
+  });
+  S.staff.forEach((s,idx)=>{ $(`hire-${idx}`).onclick=()=>buyStaff(idx); $(`upg-${idx}`).onclick=()=>upgradeStaff(idx); });
+}
+function renderSuppliers(){
+  const box = $('suppList'); box.innerHTML='';
+  S.suppliers.forEach((s,idx)=>{
+    const div=document.createElement('div'); div.className='supp';
+    const ingName = s.ing==='all'?'всё':INGREDIENTS[s.ing].name;
+    div.innerHTML=`<div class="head"><div style="display:flex;gap:8px;align-items:center"><span style="font-size:26px">${s.emoji}</span><div><div class="name">${s.name}</div><div class="desc">Поставляет: ${ingName}</div></div></div><button class="btn" id="sup-${idx}">Нанять ${s.cost}₽</button></div><div class="rate">+${s.rate}/сек за штуку • Нанято: ${s.count}</div>`;
+    box.appendChild(div);
+  });
+  S.suppliers.forEach((s,idx)=>{ $(`sup-${idx}`).onclick=()=>buySupplier(idx); });
+}
+function renderAchievements(){
+  const box = $('achList'); box.innerHTML='';
+  S.achievements.forEach((a,idx)=>{
+    const div=document.createElement('div'); div.className='ach'+(a.done?' done':'');
+    let val=0;
+    switch(a.type){
+      case 'cups': val=S.cups; break; case 'earned': val=S.earned; break; case 'iced': val=S.stats.iced; break;
+      case 'hot': val=S.stats.hot; break; case 'dessert': val=S.stats.dessert; break;
+      case 'staff': val=S.stats.staffHired; break; case 'suppliers': val=S.stats.suppliersHired; break;
+      case 'level': val=S.level; break; case 'rebirth': val=S.rebirth; break;
+      case 'rep': val=S.rep; break; case 'night': val=S.stats.night; break;
+    }
+    const pct=Math.min(100,Math.floor(val/a.target*100));
+    div.innerHTML=`<div class="icon">${a.icon}</div><div class="info"><div class="title">${a.title}</div><div class="desc">${a.desc}</div><div class="progress">${Math.min(val,a.target)}/${a.target} (${pct}%)</div></div><div class="reward">${a.claimed?'✅':a.done?'<button class="btn claim" data-i="'+idx+'">+'+(a.reward*100).toFixed(0)+'%</button>':'+'+(a.reward*100).toFixed(0)+'%'}</div>`;
+    box.appendChild(div);
+  });
+  document.querySelectorAll('.claim').forEach(b=>b.onclick=()=>claimAchievement(+b.dataset.i));
+}
+function updateUI(){
+  $('money').textContent=Math.floor(S.money); $('cups').textContent=S.cups; $('level').textContent=S.level;
+  $('xp').textContent=Math.floor(S.xp); $('need').textContent=needXp();
+  $('xpbar').style.width=Math.min(100,S.xp/needXp()*100)+'%';
+  $('achDone').textContent=S.achievements.filter(a=>a.claimed).length; $('achTotal').textContent=S.achievements.length;
+  $('rebirth').textContent=S.rebirth; $('bonus').textContent=S.rebirth*25; $('rep').textContent=S.rep;
+  const tier = repTier(); $('repName').textContent = tier.name;
+  $('autoRate').textContent=totalStaffSpeed().toFixed(1);
+  const sr=RECIPES[selectedRecipe];
+  const displayTemp = sr.cat==='dessert'?'нейтральный':selectedTemp==='hot'?'горячий':'со льдом';
+  $('click').textContent=Math.floor(recipePrice(selectedRecipe, selectedTemp)*totalMult()*tier.mult);
+  $('clickInfo').textContent=sr.name+' • '+displayTemp;
+  $('btnHot').className='toggle-btn hot'+(selectedTemp==='hot'?' active':'');
+  $('btnIced').className='toggle-btn iced'+(selectedTemp==='iced'?' active':'');
+  $('stressFill').style.width=stress+'%';
+  $('rebirthBtn').disabled=S.earned<100000;
+  renderResources(); renderOrder(); renderRecipes(); renderStorage(); renderStaff(); renderSuppliers(); renderAchievements();
+}
+
+// ============================
+// ИГРОВОЙ ЦИКЛ
+// ============================
+function gameLoop(now){
+  const dt = Math.min(1,(now-lastTick)/1000); lastTick=now;
+
+  // Время суток: 60 сек = полный день
+  dayTime += dt/60;
+  if(dayTime>=1) dayTime -= 1;
+  applyTimeEffects();
+
+  // События
+  eventTimer -= dt;
+  if(currentEvent){
+    if(eventTimer<=0) endEvent();
+    else renderEvent();
+  } else {
+    nextEventTime -= dt;
+    if(nextEventTime<=0){ startEvent(); nextEventTime = 45 + Math.random()*75; }
+  }
+
+  // Пассивный лёд/поставщики
+  suppliersWork(dt);
+
+  // Спавн заказов
+  let spawn = S.spawnRate;
+  if(currentEvent && currentEvent.effect==='spawn') spawn *= currentEvent.val;
+  if(getTimeOfDay().name==='Ночь') spawn *= 0.6;
+  if(getTimeOfDay().name==='Утро') spawn *= 1.2;
+  if(!currentOrder){
+    orderTimer += spawn * dt;
+    if(orderTimer>=1){ orderTimer-=1; generateOrder(); }
+  } else {
+    currentOrder.time -= dt;
+    if(currentOrder.time<=0){
+      log('😞 Клиент ушёл');
+      S.rep = Math.max(0, S.rep - (currentEvent&&currentEvent.effect==='strict'?3:1));
+      currentOrder=null; renderOrder();
+    }
+  }
+
+  // Персонал
+  staffWork(dt);
+
+  // Стресс восстанавливается
+  stress = Math.max(0, stress - dt*8);
+
+  autoSaveTimer += dt;
+  if(autoSaveTimer>=30){ autoSaveTimer=0; saveGame(); log('💾 Автосохранение'); }
+  updateUI();
+  requestAnimationFrame(gameLoop);
+}
+
+// ============================
+// ИНИЦИАЛИЗАЦИЯ
+// ============================
+function init(){
+  loadGame();
+  document.querySelectorAll('.tab').forEach(t=>{
+    t.onclick=()=>{
+      document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active')); t.classList.add('active');
+      ['recipes','storage','staff','suppliers','ach','rebirth'].forEach(x=>$(x).style.display=x===t.dataset.tab?'block':'none');
+      updateUI();
+    };
+  });
+  $('coffeeBtn').onclick=(e)=>{
+    initAudio();
+    if(!currentOrder) generateOrder();
+    if(currentOrder) fulfillOrder(true, e);
+  };
+  $('btnHot').onclick=()=>{ selectedTemp='hot'; updateUI(); };
+  $('btnIced').onclick=()=>{ selectedTemp='iced'; updateUI(); };
+  UPGRADES.forEach((u,idx)=>{ if($(u.id)) $(u.id).onclick=()=>{initAudio(); buyUpgrade(idx);}; });
+  $('rebirthBtn').onclick=()=>{initAudio(); doRebirth();};
+  $('saveBtn').onclick=()=>{ saveGame(); log('💾 Сохранено!'); playSound('click'); };
+  $('resetBtn').onclick=()=>{ if(confirm('Точно сбросить ВСЁ?')){ localStorage.removeItem('myataCoffeeRebirthV6'); location.reload(); } };
+  updateUI();
+  requestAnimationFrame(gameLoop);
+}
+init();
+</script>
+</body>
+</html>
