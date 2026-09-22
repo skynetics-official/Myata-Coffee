@@ -278,7 +278,7 @@ nav{min-height:72px;display:flex;align-items:center;justify-content:space-betwee
   </div>
 </div>
 
-<script>const SAVE_VERSION = 20; 
+<script>const SAVE_VERSION = 21; 
 const DAY_DURATION = 90;
 
 const INGREDIENTS = {
@@ -342,10 +342,10 @@ const SUPPLIERS_DEF=[
 ];
 
 const UPGRADES=[
-  {id:'u1',name:'Удобные стаканчики',desc:'+8₽ к цене кофе',cost:150,type:'base',val:8},
-  {id:'u2',name:'Сиропы',desc:'+25₽ к цене кофе',cost:800,type:'base',val:25},
-  {id:'u3',name:'Премиум зерно',desc:'+80₽ к цене кофе',cost:4000,type:'base',val:80},
-  {id:'u4',name:'Золотые турки',desc:'+400₽ к цене кофе',cost:25000,type:'base',val:400},
+  {id:'u1',name:'Удобные стаканчики',desc:'+3₽ к цене напитка',cost:500,type:'base',val:3},
+  {id:'u2',name:'Сиропы',desc:'+10₽ к цене напитка',cost:3000,type:'base',val:10},
+  {id:'u3',name:'Премиум зерно',desc:'+25₽ к цене напитка',cost:15000,type:'base',val:25},
+  {id:'u4',name:'Золотые турки',desc:'+80₽ к цене напитка',cost:100000,type:'base',val:80},
   {id:'u5',name:'Стеллажи',desc:'+50% к складу',cost:6000,type:'cap',val:0.5},
   {id:'u6',name:'Реклама',desc:'+25% клиентов',cost:10000,type:'spawn',val:0.25}
 ];
@@ -457,6 +457,8 @@ function loadGame(){
     if(!S.achievements||S.achievements.length!==ACHIEVEMENTS.length)S.achievements=ACHIEVEMENTS.map(a=>({...a}));
     if(!S.skins||S.skins.length!==SKINS.length)S.skins=SKINS.map(s=>({...s}));
     if(!S.upgrades||S.upgrades.length!==UPGRADES.length)S.upgrades=UPGRADES.map(u=>({...u, bought:0}));
+    S.upgrades=UPGRADES.map(def=>{const old=S.upgrades.find(x=>x.id===def.id)||{};const bought=Math.max(0,Math.floor(Number(old.bought)||0));return {...def,bought,cost:Math.floor(def.cost*Math.pow(1.5,bought))};});
+    S.baseBonus=S.upgrades.filter(u=>u.type==='base').reduce((sum,u)=>sum+u.val*u.bought,0);
     if(!S.inv){S.inv={};Object.keys(INGREDIENTS).forEach(k=>S.inv[k]=0);}
     Object.keys(INGREDIENTS).forEach(k=>{if(S.inv[k]==null)S.inv[k]=0});
     if(!S.recipes)S.recipes={espresso:true};
