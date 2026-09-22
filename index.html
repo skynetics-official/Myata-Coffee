@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Мята Coffee — Coffee Empire v14</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<nav>
+  <div class="logo">МЯТА COFFEE<i></i></div>
+  <div class="top">
+    <div class="badge">💰 <span id="money">0</span></div>
+    <div class="badge">⭐ <span id="level">1</span></div>
+    <div class="badge">🏆 <span id="achDone">0</span>/<span id="achTotal">0</span></div>
+    <div class="badge">❤️ <span id="repName">Неизвестно</span></div>
+    <div class="badge">🔄 <span id="rebirthCount">0</span></div>
+  </div>
+</nav>
+
+<div class="wrap">
+  <section class="hero">
+    <div class="eyebrow">Coffee Empire v14</div>
+    <h1>Сделай кофейню огромной</h1>
+    <p class="sub">Дни, ночи, скины, безопасный экспорт/импорт.</p>
+  </section>
+
+  <div class="day-info">
+    <span>🕐 <span id="timeName">Утро</span> (День <span id="dayNum">1</span>)</span>
+    <span id="statusText">Открыто</span>
+    <span id="eventText">Спокойный день</span>
+  </div>
+  
+  <div class="timebar"><div class="timefill" id="timeFill"></div></div>
+  <div id="eventBanner" class="event-banner" style="display:none"></div>
+  <div class="res-wrap"><div class="res-row" id="resRow"></div></div>
+
+  <div class="layout">
+    <section class="panel" id="leftPanel">
+      <div class="stat">☕ <span id="cups">0</span> заказов</div>
+      <div class="small" style="text-align:center">Опыт <span id="xp">0</span> / <span id="need">100</span></div>
+      <div class="bar"><div class="fill" id="xpbar"></div></div>
+      <div class="small" style="text-align:center">Загруженность баристы</div>
+      <div class="stress-bar"><div class="stress-fill" id="stressFill"></div></div>
+      
+      <div class="order-stage">
+        <div class="order-label">Текущий заказ</div>
+        <div id="orderCard">
+          <div class="emoji">🍃</div>
+          <div class="name">Заказов пока нет</div>
+          <div class="hint">Кликай по кружке, чтобы приготовить выбранный рецепт</div>
+        </div>
+      </div>
+
+      <button class="big-coffee" id="coffeeBtn" title="Приготовить выбранный рецепт">☕</button>
+      <div class="stat">+<span id="click">0</span> ₽</div>
+      <div class="small" style="text-align:center" id="clickInfo">Эспрессо • горячий</div>
+      
+      <div class="controls">
+        <button class="toggle-btn hot active" id="btnHot">🔥 Горячий</button>
+        <button class="toggle-btn iced" id="btnIced">❄️ Со льдом</button>
+      </div>
+
+      <p class="small" style="text-align:center;margin-top:8px">Авто-заказы: <span id="autoRate">0</span>/сек &nbsp;|&nbsp; Реп: <span id="rep">0</span></p>
+      <div class="log" id="log">Добро пожаловать в Мяту!</div>
+      
+      <hr style="border:0;border-top:1px solid var(--line);margin:12px 0">
+      
+      <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+        <button class="buy" id="saveBtn">💾 Сохранить</button>
+        <button class="reset" id="exportBtn">📤 Экспорт</button>
+        <button class="reset" id="importBtn">📥 Импорт</button>
+        <input type="file" class="file-input" id="importFile" accept=".json,.txt">
+        <button class="reset" id="resetBtn">Сброс</button>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="tabs" id="tabBar">
+        <button class="tab active" data-tab="recipes">📋 Рецепты</button>
+        <button class="tab" data-tab="storage">🥡 Склад</button>
+        <button class="tab" data-tab="staff">👨‍🍳 Персонал</button>
+        <button class="tab" data-tab="suppliers">🚚 Поставщики</button>
+        <button class="tab" data-tab="upgrades">✨ Апы</button>
+        <button class="tab" data-tab="skins">🎨 Скины</button>
+        <button class="tab" data-tab="ach">🏆 Достижения</button>
+        <button class="tab" data-tab="rebirth">🔄 Ребирт</button>
+      </div>
+
+      <div id="recipes">
+        <div class="tip">💡 1 клик = 1 приготовленная чашка из заказа. Заказы с несколькими напитками требуют несколько кликов!</div>
+        <div class="recipe-grid" id="recipeCards"></div>
+      </div>
+      
+      <div id="storage" style="display:none">
+        <p class="small" style="margin-top:0">Закупка ингредиентов (партиями по 10 шт).</p>
+        <div class="inv-grid" id="invGrid"></div>
+      </div>
+      
+      <div id="staff" style="display:none">
+        <p class="small" style="margin-top:0">Персонал автоматически готовит заказы.</p>
+        <div id="staffList"></div>
+      </div>
+      
+      <div id="suppliers" style="display:none">
+        <p class="small" style="margin-top:0">Автозакупка ингредиентов.</p>
+        <div id="suppList"></div>
+      </div>
+      
+      <div id="upgrades" style="display:none">
+        <p class="small" style="margin-top:0">Постоянные улучшения для кофейни (сбрасываются при ребирте).</p>
+        <div id="upgradeList"></div>
+      </div>
+      
+      <div id="skins" style="display:none">
+        <p class="small" style="margin-top:0">Меняй внешний вид кофейни.</p>
+        <div id="skinList"></div>
+      </div>
+      
+      <div id="ach" style="display:none">
+        <p class="small" style="margin-top:0">Выполняй цели и получай бонусы навсегда.</p>
+        <div id="achList"></div>
+      </div>
+      
+      <div id="rebirth" style="display:none">
+        <div style="text-align:center;padding:12px">
+          <div style="font-size:28px;color:var(--purple);font-weight:900">+<span id="bonus">0</span>% к доходу</div>
+          <div class="small" style="margin: 10px 0; padding: 10px; background: rgba(0,0,0,0.05); border-radius: 8px;">
+              Прогресс для ребирта:<br>
+              <b id="rebirthEarned" style="font-size: 16px; color: var(--green);">0</b> / <b>100 000 ₽</b>
+          </div>
+          <p class="small" style="color: var(--muted)">Ребирт сбросит текущие деньги, склад, персонал и улучшения, но оставит достижения, скины и даст +25% к доходу навсегда!</p>
+          <button class="btn" id="rebirthBtn" style="margin-top:8px;padding:10px 20px;font-size:14px">🔄 Сделать ребирт</button>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<div class="bottom-nav">
+  <button data-tab="recipes">📋<span>Рецепты</span></button>
+  <button data-tab="storage">🥡<span>Склад</span></button>
+  <button data-tab="staff">👨‍🍳<span>Персонал</span></button>
+  <button data-tab="upgrades">✨<span>Апы</span></button>
+  <button data-tab="skins">🎨<span>Скины</span></button>
+  <button data-tab="ach">🏆<span>Ачивки</span></button>
+</div>
+
+<div id="dayOverlay">
+  <div class="day-modal">
+    <h2>🌙 Кофейня закрыта</h2>
+    <p class="small">День <span id="modalDay">1</span> завершён</p>
+    <div class="big-num" id="modalMoney">0 ₽</div>
+    <div class="row"><span>Заказов сегодня:</span><b id="modalCups">0</b></div>
+    <div class="row"><span>Репутация:</span><b id="modalRep">0</b></div>
+    <div class="row"><span>Бонус за день:</span><b id="modalBonus">+0 ₽</b></div>
+    <p class="small" id="modalComment">Неплохой день!</p>
+    <button class="btn" id="openMorningBtn" style="margin-top:14px;padding:12px 28px;font-size:15px">☀️ Открыть утром</button>
+  </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
