@@ -278,7 +278,7 @@ nav{min-height:72px;display:flex;align-items:center;justify-content:space-betwee
   </div>
 </div>
 
-<script>const SAVE_VERSION = 19; 
+<script>const SAVE_VERSION = 20; 
 const DAY_DURATION = 90;
 
 const INGREDIENTS = {
@@ -308,10 +308,10 @@ const RECIPES = {
   cheesecake:{emoji:'🧀',name:'Чизкейк',cat:'dessert',base:650,hot:false,iced:false,ing:{flour:2,butter:1,sugar:2,cream:2},cost:16000},
   muffin:{emoji:'🧁',name:'Маффин',cat:'dessert',base:180,hot:false,iced:false,ing:{flour:3,sugar:1,butter:1,berries:1},cost:3500},
   tiramisu:{emoji:'🍮',name:'Тирамису',cat:'dessert',base:520,hot:false,iced:false,ing:{flour:2,butter:1,cream:2,chocolate:1},cost:14000},
-  doppio:{emoji:'⚡',name:'Доппио',cat:'coffee',base:65,hot:true,iced:false,ing:{beans:4,sugar:1},rebirthReq:1},
-  lavenderRaf:{emoji:'🪻',name:'Лавандовый раф',cat:'coffee',base:120,hot:true,iced:true,ing:{beans:2,cream:3,vanilla:2},rebirthReq:2},
-  volcanoLatte:{emoji:'🌋',name:'Вулканический латте',cat:'coffee',base:280,hot:true,iced:true,ing:{beans:4,milk:3,chocolate:2},rebirthReq:7},
-  divine:{emoji:'✨',name:'Божественный кофе',cat:'coffee',base:3500,hot:true,iced:true,ing:{beans:15,cream:5,vanilla:3,chocolate:2},rebirthReq:20}
+  doppio:{emoji:'⚡',name:'Доппио',cat:'coffee',base:65,hot:true,iced:false,ing:{beans:4,sugar:1},cost:5000,rebirthReq:1},
+  lavenderRaf:{emoji:'🪻',name:'Лавандовый раф',cat:'coffee',base:120,hot:true,iced:true,ing:{beans:2,cream:3,vanilla:2},cost:15000,rebirthReq:2},
+  volcanoLatte:{emoji:'🌋',name:'Вулканический латте',cat:'coffee',base:280,hot:true,iced:true,ing:{beans:4,milk:3,chocolate:2},cost:100000,rebirthReq:7},
+  divine:{emoji:'✨',name:'Божественный кофе',cat:'coffee',base:3500,hot:true,iced:true,ing:{beans:15,cream:5,vanilla:3,chocolate:2},cost:1000000,rebirthReq:20}
 };
 
 const STAFF_DEF=[
@@ -444,7 +444,7 @@ function saveGame(){
 
 function loadGame(){
   try{
-    const raw = localStorage.getItem('myataCoffeeSecureV14') || localStorage.getItem('myataCoffeeRebirthV19') || localStorage.getItem('myataCoffeeRebirthV13') || localStorage.getItem('myataCoffeeRebirthV12');
+    const raw = localStorage.getItem('myataCoffeeSecureV14') || localStorage.getItem('myataCoffeeRebirthV20') || localStorage.getItem('myataCoffeeRebirthV19') || localStorage.getItem('myataCoffeeRebirthV13') || localStorage.getItem('myataCoffeeRebirthV12');
     if(!raw)return;
     const loaded = deserializeSave(raw);
     if(!loaded || typeof loaded.money !== 'number') return;
@@ -744,8 +744,10 @@ function attachHandlers(){
     const r=RECIPES[id];
     if(!S.recipes[id]){
       if(r.rebirthReq&&S.rebirth<r.rebirthReq){log('🔒 Нужен ребирт '+r.rebirthReq);return;}
-      if(S.money<r.cost){log('💸 Не хватает денег');return;}
-      S.money-=r.cost; S.recipes[id]=true; log('✨ Рецепт "'+r.name+'" открыт!'); playSound('ach');
+      const unlockCost=Number.isFinite(Number(r.cost))?Number(r.cost):0;
+      if(S.money<unlockCost){log('💸 Не хватает денег');return;}
+      if(unlockCost>0) S.money-=unlockCost;
+      S.recipes[id]=true; log(unlockCost>0?'✨ Рецепт "'+r.name+'" открыт за '+unlockCost.toLocaleString('ru-RU')+' ₽!':'✨ Рецепт "'+r.name+'" открыт!'); playSound('ach');
     } else {
       selectedRecipe=id;
       if(r.cat==='dessert') selectedTemp='neutral';
@@ -795,7 +797,7 @@ function updateStaticDOM(){
       if(el.hot){el.hot.classList.toggle('active',selectedRecipe===id&&selectedTemp==='hot');el.iced.classList.toggle('active',selectedRecipe===id&&selectedTemp==='iced');}
     }else{
       if(r.rebirthReq){el.btn.disabled=S.rebirth<r.rebirthReq;el.btn.textContent='🔒 Ребирт '+r.rebirthReq+'+';}
-      else{el.btn.disabled=S.money<r.cost;el.btn.textContent='Открыть '+r.cost+'₽';}
+      else{const unlockCost=Number.isFinite(Number(r.cost))?Number(r.cost):0;el.btn.disabled=S.money<unlockCost;el.btn.textContent=unlockCost>0?'Открыть '+unlockCost.toLocaleString('ru-RU')+' ₽':'Открыть';}
       el.cost.textContent='???';
     }
   });
@@ -813,6 +815,9 @@ function updateStaticDOM(){
 
 function updateUI(){
   try{
+    if(!Number.isFinite(Number(S.money))) S.money=200;
+    if(!Number.isFinite(Number(S.earned))) S.earned=0;
+    if(!Number.isFinite(Number(S.xp))) S.xp=0;
     if(!domBuilt){buildStaticDOM();}
     $('money').textContent=Math.floor(S.money);$('cups').textContent=S.cups;$('level').textContent=S.level;
     if($('dayNum'))$('dayNum').textContent=S.day;
